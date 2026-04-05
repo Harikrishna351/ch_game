@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feelings Village - Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #F5F1E8;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #6B7280;
+            font-size: 28px;
+            text-shadow: 2px 2px 0px #E07A5F;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #81B29A;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* Scene Viewport */
+        .scene-box {
+            background: white;
+            border: 4px solid #6B7280;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 0 #6B7280;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .character-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            min-height: 150px;
+        }
+
+        /* Clay Characters (CSS Art) */
+        .character {
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .blob {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            position: relative;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            border: 3px solid rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
+        }
+
+        .blob::before, .blob::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            top: 25px;
+            animation: blink 4s infinite;
+        }
+
+        .blob::before { left: 20px; }
+        .blob::after { right: 20px; }
+
+        .blob.milo {
+            background: #98C1D9;
+            border-radius: 60% 60% 50% 50%;
+        }
+
+        .blob.milo.sad {
+            background: #9CA3AF;
+            transform: scaleY(0.9);
+        }
+
+        .blob.milo.happy {
+            background: #98C1D9;
+            animation: bounce 1s infinite;
+        }
+
+        .blob.zara {
+            background: #F2CC8F;
+            border-radius: 50% 50% 45% 45%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .mouth {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid #333;
+            border-radius: 0 0 20px 20px;
+            transition: all 0.3s;
+        }
+
+        .blob.sad .mouth {
+            border-bottom: none;
+            border-top: 3px solid #333;
+            border-radius: 20px 20px 0 0;
+            bottom: 15px;
+        }
+
+        .blob.happy .mouth {
+            height: 15px;
+            border-bottom: 4px solid #333;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes blink {
+            0%, 96%, 100% { transform: scaleY(1); }
+            98% { transform: scaleY(0.1); }
+        }
+
+        /* Dialogue Box */
+        .dialogue {
+            background: #FDF6E3;
+            border: 3px solid #E07A5F;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 16px;
+            color: #6B7280;
+            line-height: 1.4;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .dialogue::before {
+            content: '💬';
+            position: absolute;
+            top: -15px;
+            left: 10px;
+            font-size: 24px;
+        }
+
+        .speaker {
+            font-weight: 700;
+            color: #E07A5F;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Emotion Selection */
+        .emotion-question {
+            text-align: center;
+            font-family: 'Fredoka One', cursive;
+            color: #6B7280;
+            font-size: 20px;
+            margin: 20px 0;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 3px solid #6B7280;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 18px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: #6B7280;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #6B7280;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #6B7280;
+        }
+
+        .choice-btn:hover {
+            background: #FDF6E3;
+        }
+
+        .choice-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F5F1E8;
+            border-radius: 50%;
+            border: 2px solid #6B7280;
+        }
+
+        .choice-1 { border-color: #E07A5F; }
+        .choice-2 { border-color: #98C1D9; }
+        .choice-3 { border-color: #F2CC8F; }
+
+        /* Strategy Selection (Phase 2) */
+        .strategy-box {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #81B29A;
+            border-radius: 20px;
+            color: white;
+            margin-top: 20px;
+            animation: popIn 0.5s;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .leaf-reward {
+            font-size: 48px;
+            margin: 20px 0;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .restart-btn {
+            background: #F2CC8F;
+            border: 3px solid #6B7280;
+            color: #6B7280;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 0 #6B7280;
+        }
+
+        .restart-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #6B7280;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Mobile optimization */
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            h1 { font-size: 24px; }
+            .scene-box { padding: 20px; }
+            .choice-btn { font-size: 16px; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Feelings Village</h1>
+            <div class="subtitle">The Sparkle Robot</div>
+        </div>
+
+        <div class="scene-box" id="scene1">
+            <div class="character-container">
+                <div class="character">
+                    <div class="blob milo" id="miloFace">
+                        <div class="mouth"></div>
+                    </div>
+                    <div style="font-weight: 700; color: #6B7280;">Milo</div>
+                </div>
+                <div style="font-size: 40px; animation: float 2s infinite;">✨</div>
+                <div class="character">
+                    <div class="blob zara">
+                        <div class="mouth" style="border-bottom: 4px solid #333; height: 15px;"></div>
+                    </div>
+                    <div style="font-weight: 700; color: #6B7280;">Zara</div>
+                </div>
+            </div>
+
+            <div class="dialogue" id="dialogueText">
+                <span class="speaker">Zara:</span>
+                "Look Milo! My robot dances when I sing! 🎵"
+            </div>
+
+            <div style="text-align: center; margin: 15px 0; font-size: 24px;">
+                <span id="miloReaction">😔</span>
+            </div>
+
+            <div class="dialogue">
+                <span class="speaker">Milo:</span>
+                "Oh... that's nice..." <em style="color: #9CA3AF;">(Milo looks down at his old wooden car)</em>
+            </div>
+        </div>
+
+        <!-- Emotion Selection Phase -->
+        <div id="emotionPhase">
+            <div class="emotion-question">How is Milo feeling?</div>
+
+            <div class="choices">
+                <button class="choice-btn choice-1" onclick="selectEmotion('angry')">
+                    <div class="choice-icon">😤</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">He wants to</div>
+                        <div>Break the toy</div>
+                    </div>
+                </button>
+
+                <button class="choice-btn choice-2" onclick="selectEmotion('sad')">
+                    <div class="choice-icon">😢</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">He feels</div>
+                        <div>Small inside</div>
+                    </div>
+                </button>
+
+                <button class="choice-btn choice-3" onclick="selectEmotion('jealous')">
+                    <div class="choice-icon">🤩</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">He really</div>
+                        <div>Wants one too</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Strategy Phase (Hidden initially) -->
+        <div id="strategyPhase" class="strategy-box">
+            <div class="emotion-question" id="emotionLabel">Milo feels jealous...</div>
+            <div style="text-align: center; margin-bottom: 20px; color: #6B7280; padding: 0 20px;">
+                This feeling happens when we want what someone else has. What should Milo do?
+            </div>
+
+            <div class="choices">
+                <button class="choice-btn" onclick="selectStrategy('talk')" style="border-color: #81B29A;">
+                    <div class="choice-icon">🗣️</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">Be honest</div>
+                        <div>"I feel jealous..."</div>
+                    </div>
+                </button>
+
+                <button class="choice-btn" onclick="selectStrategy('breathe')" style="border-color: #98C1D9;">
+                    <div class="choice-icon">🧘</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">Take a moment</div>
+                        <div>Deep breaths</div>
+                    </div>
+                </button>
+
+                <button class="choice-btn" onclick="selectStrategy('create')" style="border-color: #F2CC8F;">
+                    <div class="choice-icon">🎨</div>
+                    <div>
+                        <div style="font-size: 14px; color: #999; font-weight: normal;">Make it special</div>
+                        <div>Decorate his car</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="result-screen">
+            <div class="leaf-reward">🌿 🌿 🌿</div>
+            <h2 style="font-family: 'Fredoka One', cursive; margin-bottom: 15px;">Great Choice!</h2>
+            <p id="resultText" style="font-size: 18px; line-height: 1.5; margin-bottom: 20px;">
+                Milo learned that jealousy is just a feeling, not an action.
+            </p>
+            <div style="background: rgba(255,255,255,0.3); padding: 15px; border-radius: 10px; font-size: 14px; margin-bottom: 20px;">
+                <strong>💡 For Parents:</strong><br>
+                Ask your child: "When did you feel happy for someone today?"
+            </div>
+            <button class="restart-btn" onclick="location.reload()">Play Again ↺</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedEmotion = '';
+
+        function selectEmotion(emotion) {
+            selectedEmotion = emotion;
+            const miloFace = document.getElementById('miloFace');
+            const miloReaction = document.getElementById('miloReaction');
+            const emotionLabel = document.getElementById('emotionLabel');
+            const dialogueText = document.getElementById('dialogueText');
+
+            // Hide emotion phase
+            document.getElementById('emotionPhase').style.display = 'none';
+
+            // Update Milo based on selection
+            if (emotion === 'sad') {
+                miloFace.classList.add('sad');
+                miloReaction.textContent = '😢';
+                emotionLabel.textContent = "Milo feels small inside...";
+                dialogueText.innerHTML = '<span class="speaker">Narrator:</span> "Milo feels like he\'s shrinking. This feeling is called <strong>Jealousy</strong>."';
+            } else if (emotion === 'angry') {
+                miloFace.style.background = '#E07A5F';
+                miloReaction.textContent = '😤';
+                emotionLabel.textContent = "Milo feels red-hot inside...";
+                dialogueText.innerHTML = '<span class="speaker">Narrator:</span> "Milo wants to grab the toy! But wait... this feeling is <strong>Jealousy</strong>."';
+            } else {
+                miloReaction.textContent = '🤩';
+                emotionLabel.textContent = "Milo really wants that toy...";
+                dialogueText.innerHTML = '<span class="speaker">Narrator:</span> "Milo wishes he had the robot. This feeling is <strong>Jealousy</strong>—wanting what others have."';
+            }
+
+            // Show strategy phase after short delay
+            setTimeout(() => {
+                document.getElementById('strategyPhase').style.display = 'block';
+                document.getElementById('strategyPhase').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+
+        function selectStrategy(strategy) {
+            const resultScreen = document.getElementById('resultScreen');
+            const resultText = document.getElementById('resultText');
+            const miloFace = document.getElementById('miloFace');
+
+            // Hide strategy phase
+            document.getElementById('strategyPhase').style.display = 'none';
+            document.getElementById('scene1').style.display = 'none';
+
+            // Make Milo happy
+            miloFace.classList.remove('sad');
+            miloFace.classList.add('happy');
+            miloFace.style.background = '#98C1D9';
+
+            // Set result text based on strategy
+            const outcomes = {
+                'talk': 'Milo told Zara: "I feel jealous." Zara said: "Want to share turns?" Now they both play with the robot together!',
+                'breathe': 'Milo took 3 deep breaths. The jealous feeling got smaller. He remembered his car is special because his grandpa made it.',
+                'create': 'Milo added stickers to his car. Now it\'s the "Super Sparkle Car!" He felt proud of making something unique.'
+            };
+
+            resultText.textContent = outcomes[strategy];
+            resultScreen.style.display = 'block';
+
+            // Confetti effect (simple CSS animation trigger)
+            setTimeout(() => {
+                resultScreen.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Add floating particles for atmosphere
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.pointerEvents = 'none';
+            particle.style.opacity = '0.3';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = '-10px';
+            particle.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            particle.style.animation = `float ${Math.random() * 3 + 2}s linear`;
+            particle.textContent = ['✨', '🍃', '💫'][Math.floor(Math.random() * 3)];
+            document.body.appendChild(particle);
+
+            setTimeout(() => particle.remove(), 5000);
+        }
+
+        setInterval(createParticle, 2000);
+    </script>
+</body>
+</html>
